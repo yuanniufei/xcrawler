@@ -31,8 +31,9 @@ class BaiduNewsSpider(BaseSpider):
         self.file.close()
 
     def spider_idle(self):
+        pass
         # 引擎空闲时，你也可以从数据库中提取新的 URL 进来
-        print('I am in idle mode')
+        # print('I am in idle mode')
         # self.crawler.crawl(new_request, spider=self)
 
     def make_requests_from_url(self, url):
@@ -70,8 +71,8 @@ def main():
         'download_delay': 1,
         'download_timeout': 6,
         'retry_on_timeout': True,
-        'concurrent_requests': 16,
-        'queue_size': 512
+        'concurrent_requests': 48,
+        'queue_size': 1024
     }
     crawler = CrawlerProcess(settings, 'DEBUG')
     crawler.crawl(BaiduNewsSpider)

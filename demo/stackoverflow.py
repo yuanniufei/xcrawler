@@ -7,8 +7,6 @@
 # Version: 0.0.1
 # Description: stackoverflow.com
 import json
-import os
-import sys
 from xcrawler.spider import BaseSpider, Request
 from lxml.html import fromstring
 
@@ -43,13 +41,14 @@ class StackoverflowSpider(BaseSpider):
         yield Request(next_url, headers=self.default_headers)
 
         for ele in root.xpath(question_element_rule):
+            print(ele)
             item = dict()
-            item['question_title'] = self._extract_first(ele, '//a[@class="question-hyperlink"]/text()')
-            item['question_url'] = response.urljoin(self._extract_first(ele, '//a[@class="question-hyperlink"]/@href'))
-            item['question_desc'] = self._extract_first(ele, '//div[@class="excerpt"]/text()').strip()
-            item['question_tags'] = ele.xpath('//a[@class="post-tag"]/text()')
-            item['votes'] = self._extract_first(ele, '//span[@class="vote-count-post "]/strong/text()')
-            item['username'] = self._extract_first(ele, '//div[@class="user-details"]/a/text()')
+            item['question_title'] = self._extract_first(ele, 'a[@class="question-hyperlink"]/text()')
+            item['question_url'] = response.urljoin(self._extract_first(ele, 'a[@class="question-hyperlink"]/@href'))
+            item['question_desc'] = self._extract_first(ele, 'div[@class="excerpt"]/text()').strip()
+            item['question_tags'] = ele.xpath('a[@class="post-tag"]/text()')
+            item['votes'] = self._extract_first(ele, 'span[@class="vote-count-post "]/strong/text()')
+            item['username'] = self._extract_first(ele, 'div[@class="user-details"]/a/text()')
             yield item
 
     def process_item(self, item):

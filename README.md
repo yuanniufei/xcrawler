@@ -3,8 +3,7 @@ xcrawler, a light-weight web crawler framework
 
 # Introduction
 `xcrawler`, it's a light-weight web crawler framework. Some of its design concepts are borrowed from the well-known framework [Scrapy](https://github.com/scrapy).
-The downloader of the engine is implemented with the `requests` library. There are two different thread pools in the crawler's engine, one is for the
-downloader and the other for the processors (to extract data and so on).
+The downloader of the engine is implemented with the `requests` library. 
 
 I'm very interested in web crawling, however, I'm just a newbie to web scraping. I did this so that I can learn more basics of web crawling and Python language.
 

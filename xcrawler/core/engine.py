@@ -106,7 +106,7 @@ class CrawlerEngine(object):
         :param spider: spider instance
         :return:
         """
-        self._process_request(request, spider)
+        self._enqueue_request(request, spider)
 
     def _engine_idle(self):
         """
@@ -144,9 +144,9 @@ class CrawlerEngine(object):
         """
         for spider in self._spiders.values():
             try:
-                [self.crawl(request, spider) for request in getattr(spider, 'start_requests')()]
-            except:
-                self.logger.error('Spider missing method "start_requests".', exc_info=True)
+                [self.crawl(request, spider) for request in self.__call_func_in_spider(spider, 'start_requests')]
+            except Exception as err:
+                self.logger.error(err, exc_info=True)
 
     def _process_request(self, request, spider):
         """
@@ -156,13 +156,15 @@ class CrawlerEngine(object):
         :return: None
         """
         self.logger.debug('[{}][{}] Processing request: {}'.format(spider.name, self._requests_queue.qsize(), request))
-
         self.__call_func_in_spider(spider, 'process_request', request)
 
+    def _enqueue_request(self, request, spider):
         if request:
             if not request.dont_filter and self.__request_seen(request):
                 self.logger.debug('[{}] Ignore duplicated request {}'.format(spider.name,
                                                                              request))
+                return
+
         self._requests_queue.put((request, spider))
 
     def _process_response(self, response, spider):
@@ -236,21 +238,45 @@ class CrawlerEngine(object):
         executor.shutdown(False)
 
     def _download(self, request, spider):
-        try:
-            r = requests.get(request.url,
-                             timeout=self.download_timeout,
-                             cookies=request.cookies,
-                             headers=request.headers,
-                             proxies={'http': request.proxy, 'https': request.proxy})
-
-            self._responses_queue.put((Response(r.url, r.status_code, r.content, request), spider))
-        except requests.ReadTimeout or requests.ConnectTimeout:
+        def _retry():
             if self.retry_on_download_timeout:
                 self.logger.debug('Read timed out, retry request {}'.format(request))
                 self.crawl(request, spider)
 
+        try:
+            self._process_request(request, spider)
+
+            if request is None:
+                return
+
+            method = request.method.upper()
+
+            resp = None
+            kw_params = {
+                'timeout': self.download_timeout,
+                'cookies': request.cookies,
+                'headers': request.headers,
+                'proxies': {
+                    'http': request.proxy,
+                    'https': request.proxy
+                }
+            }
+
+            self.logger.debug('[{}]<{} {}>'.format(spider.name, method, request.url))
+
+            if method == 'GET':
+                resp = requests.get(request.url, **kw_params)
+            elif method == 'POST':
+                resp = requests.post(request.url, request.data, **kw_params)
+
+            self._responses_queue.put((Response(resp.url, resp.status_code, resp.content, request), spider))
+        except requests.ReadTimeout:
+            _retry()
+        except requests.ConnectTimeout:
+            _retry()
+        except requests.ConnectionError:
+            _retry()
         except Exception as err:
-            print(type(err))
             self.logger.error(err)
 
     def _next_requests_batch(self):
@@ -262,13 +288,14 @@ class CrawlerEngine(object):
 
     def __call_func_in_spider(self, spider, name, *args, **kwargs):
         try:
-            return getattr(spider, name, None)(*args, **kwargs)
+            if hasattr(spider, name):
+                return getattr(spider, name)(*args, **kwargs)
         except Exception as err:
             self.logger.error(err, exc_info=True)
 
     def __call_func_in_spiders(self, name, *args, **kwargs):
         for s in self._spiders.values():
-            return self.__call_func_in_spider(s, name, *args, **kwargs)
+            self.__call_func_in_spider(s, name, *args, **kwargs)
 
     def __request_seen(self, request):
         fp = self.__request_fingerprint(request)
