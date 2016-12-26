@@ -5,7 +5,7 @@
 # File   : engine.py
 # Date   : 2016-12-24 03:03
 # Version: 0.0.2
-# Description: the core engine of this crawler, which schedule downloader to handle requests
+# Description: the core engine of this crawler, which schedules the downloader to handle requests
 # in the queue. Besides, it invokes corresponding parser of different spiders to process responses
 # in the other queue.
 
