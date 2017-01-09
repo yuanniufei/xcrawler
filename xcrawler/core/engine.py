@@ -4,7 +4,7 @@
 # License: MIT License
 # File   : engine.py
 # Date   : 2016-12-24 03:03
-# Version: 0.0.2
+# Version: 0.0.3
 # Description: the core engine of this crawler, which schedules the downloader to handle requests
 # in the queue. Besides, it invokes corresponding parser of different spiders to process responses
 # in the other queue.
@@ -23,7 +23,7 @@ from xcrawler.spider.request import Request
 from xcrawler.spider.response import Response
 from xcrawler.utils.url import url_fingerprint
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __author__ = 'Chris'
 
 __all__ = ['CrawlerEngine']
@@ -269,15 +269,12 @@ class CrawlerEngine(object):
             elif method == 'POST':
                 resp = requests.post(request.url, request.data, **kw_params)
 
-            self._responses_queue.put((Response(resp.url, resp.status_code, resp.content, request), spider))
-        except requests.ReadTimeout:
-            _retry()
-        except requests.ConnectTimeout:
-            _retry()
-        except requests.ConnectionError:
+            self._responses_queue.put((Response(resp.url, resp.status_code, resp.content, request,
+                                                resp.cookies), spider))
+        except (requests.ReadTimeout, requests.ConnectTimeout, requests.ConnectionError):
             _retry()
         except Exception as err:
-            self.logger.error(err)
+            self.logger.error(err, exc_info=True)
 
     def _next_requests_batch(self):
         for i in range(self.concurrent_requests):

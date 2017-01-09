@@ -20,8 +20,8 @@ class Response(object):
         self.request = request
         self.url = url
         self.base_url = base_url(url)
-        self.cookies = cookies
-        self.headers = headers
+        self.cookies = cookies or {}
+        self.headers = headers or {}
         self.status = status
         self.content = content or ''
         self.meta = getattr(request, 'meta', None)

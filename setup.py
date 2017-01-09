@@ -4,7 +4,7 @@
 # License: MIT License
 # File   : setup.py
 # Date   : 2016-12-24 03:20
-# Version: 0.0.3
+# Version: 0.0.4
 # Description: description of this file.
 
 import sys
@@ -16,7 +16,7 @@ if sys.version_info < (3, 4):
 
 setup(
     name='xcrawler',
-    version='0.0.3',
+    version='0.0.4',
     packages=['xcrawler'],
     install_requires=['requests'],
     url='https://www.github.com/chrisleegit/xcrawler',

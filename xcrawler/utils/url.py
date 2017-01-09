@@ -8,7 +8,7 @@
 # Description: handy functions for url processing.
 
 from hashlib import sha1
-from urllib.parse import urlparse, urlencode, urlsplit, urlunsplit
+from urllib.parse import urlparse, urlencode, urlsplit, urlunsplit, quote
 
 __version__ = '0.0.1'
 __author__ = 'Chris'
@@ -24,7 +24,7 @@ def safe_url(url, remove_empty_query=True):
     scheme, netloc, path, query, fragment = urlsplit(url)
 
     if not query:
-        return url
+        return url.rstrip('/')
 
     # Sort all the queries
     queries = []
@@ -41,7 +41,7 @@ def safe_url(url, remove_empty_query=True):
     queries.sort(key=lambda x: x[0])
     query = urlencode(queries)
 
-    return urlunsplit((scheme, netloc, path, query, fragment))
+    return urlunsplit((scheme, netloc, path, query, fragment)).rstrip('/')
 
 
 def base_url(url):
@@ -51,7 +51,8 @@ def base_url(url):
 
 def main():
     url = (safe_url('http://fanyi.baidu.com/translate?jlfal=测试&aldtype=16047&ell='))
-    print(url_fingerprint(url))
+    print(url)
+    print(safe_url('https://movie.douban.com/subject/2353023'))
 
 
 if __name__ == '__main__':

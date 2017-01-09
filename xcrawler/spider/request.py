@@ -20,7 +20,7 @@ class Request(object):
         # Available methods: GET, POST
         self.method = method
         self.data = data
-        self.cookies = cookies
+        self.cookies = cookies or {}
         self.headers = headers or {}
         self.meta = meta
         self.proxy = proxy
@@ -29,3 +29,7 @@ class Request(object):
 
     def __repr__(self):
         return '<Request url="{url}">'.format(**self.__dict__)
+
+
+if __name__ == '__main__':
+    print(safe_url('http://www.baidu.com/爱情'))

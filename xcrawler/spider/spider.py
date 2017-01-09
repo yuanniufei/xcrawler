@@ -36,7 +36,8 @@ class BaseSpider(object):
             yield self.make_requests_from_url(url)
 
     def make_requests_from_url(self, url):
-        return Request(url, callback=self.parse)
+        return Request(url, headers=getattr(self, 'default_headers', None),
+                       callback=self.parse)
 
     def parse(self, response):
         raise NotImplementedError
