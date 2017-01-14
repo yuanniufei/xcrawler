@@ -7,8 +7,8 @@
 # Version: 0.0.1
 # Description: crawl news in `http://news.baidu.com/`
 
-from xcrawler import CrawlerProcess
-from xcrawler.spider import BaseSpider, Request
+from projects.xcrawler import CrawlerProcess
+from projects.xcrawler import BaseSpider, Request
 from lxml.html import fromstring
 import json
 

@@ -8,7 +8,7 @@
 # Description: base spider class.
 
 import logging
-from xcrawler.spider.request import Request
+from xcrawler.spider import Request
 
 __version__ = '0.0.1'
 __author__ = 'Chris'

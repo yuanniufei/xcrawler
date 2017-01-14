@@ -21,15 +21,19 @@ __version__ = '0.0.1'
 __author__ = 'Chris'
 
 
-class DoubanSpider(BaseSpider):
-    name = 'douban_spider'
+class DoubanMovieSpider(BaseSpider):
+    name = 'douban_movie_spider'
     start_urls = ['https://movie.douban.com/tag/爱情',
                   'https://movie.douban.com/tag/喜剧',
-                  'https://movie.douban.com/tag/动画']
+                  'https://movie.douban.com/tag/动画',
+                  'https://movie.douban.com/tag/动作',
+                  'https://movie.douban.com/tag/史诗',
+                  'https://movie.douban.com/tag/犯罪']
 
     default_headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
                       'Chrome/50.0.2661.102 Safari/537.36',
+        'Host': 'movie.douban.com',
         'Referer': 'https://movie.douban.com'
     }
 
@@ -84,7 +88,7 @@ class DoubanSpider(BaseSpider):
         yield movie_info
 
     def process_item(self, item):
-        pprint.pprint(item)
+        # pprint.pprint(item)
         print(json.dumps(item, ensure_ascii=False, sort_keys=True), file=self._movie_file)
 
     def process_request(self, request):
@@ -104,14 +108,14 @@ class DoubanSpider(BaseSpider):
 
 def main():
     settings = {
-        'download_delay': 1.5,
+        'download_delay': 0.1,
         'download_timeout': 12,
         'retry_on_timeout': True,
         'concurrent_requests': 16,
-        'queue_size': 1024
+        'queue_size': 4096
     }
-    crawler = CrawlerProcess(settings, 'INFO')
-    crawler.crawl(DoubanSpider)
+    crawler = CrawlerProcess(settings, 'DEBUG')
+    crawler.crawl(DoubanMovieSpider)
     crawler.start()
 
 

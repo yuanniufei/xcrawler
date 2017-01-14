@@ -7,8 +7,10 @@
 # Version: 0.0.1
 # Description: stackoverflow.com
 import json
-from xcrawler.spider import BaseSpider, Request
+from projects.xcrawler import BaseSpider, Request
 from lxml.html import fromstring
+
+from xcrawler import CrawlerProcess
 
 __version__ = '0.0.1'
 __author__ = 'Chris'
@@ -68,8 +70,6 @@ class StackoverflowSpider(BaseSpider):
 
 
 def main():
-    from xcrawler import CrawlerProcess
-
     settings = {
         'download_delay': 1,
         'download_timeout': 24,
