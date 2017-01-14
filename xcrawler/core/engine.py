@@ -11,16 +11,17 @@
 
 import logging
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pprint import pformat
 from queue import Queue, Empty
 from random import randint
 
+import pybloom
 import requests
-import time
 
-from xcrawler.spider.request import Request
-from xcrawler.spider.response import Response
+from xcrawler.spider import Request
+from xcrawler.spider import Response
 from xcrawler.utils.url import url_fingerprint
 
 __version__ = '0.0.3'
@@ -56,8 +57,8 @@ class CrawlerEngine(object):
         self._responses_queue = Queue(queue_size)
         self._spiders = {}
 
-        # filter duplicated requests in queue
-        self._seen = set()
+        # filter duplicate requests in the queue, we use BloomFilter instead of a set container
+        self._seen = pybloom.ScalableBloomFilter()
 
     def start(self):
         """
@@ -228,11 +229,12 @@ class CrawlerEngine(object):
         with ThreadPoolExecutor(self.concurrent_requests) as executor:
             while self.status:
                 futures = [executor.submit(self._download, req, spider) for req, spider in self._next_requests_batch()]
-                for f in as_completed(futures):
-                    # wait until all the requests in this batch are downloaded
-                    _ = f
+                _ = futures
+                # for f in as_completed(futures):
+                #     # wait until all the requests in this batch are downloaded
+                #     _ = f
 
-            time.sleep(self.download_delay * randint(1, 5))
+                time.sleep(self.download_delay * randint(1, 5))
 
         self.logger.debug('Stop downloaders.')
         executor.shutdown(False)

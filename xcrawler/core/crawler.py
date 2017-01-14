@@ -8,7 +8,7 @@
 # Description: Crawler process starts the core engine.
 
 import logging
-from xcrawler.core.engine import CrawlerEngine
+from xcrawler import CrawlerEngine
 
 __version__ = '0.0.2'
 __author__ = 'Chris'
