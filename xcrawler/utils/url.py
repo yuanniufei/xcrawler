@@ -8,7 +8,7 @@
 # Description: handy functions for url processing.
 
 from hashlib import sha1
-from urllib.parse import urlparse, urlencode, urlsplit, urlunsplit, quote
+from urllib.parse import urlparse, urlencode, urlunsplit
 
 __version__ = '0.0.1'
 __author__ = 'Chris'
@@ -21,27 +21,33 @@ def url_fingerprint(url):
 
 
 def safe_url(url, remove_empty_query=True):
-    scheme, netloc, path, query, fragment = urlsplit(url)
+    try:
+        scheme, netloc, path, query, fragment = urlparse(url)
 
-    if not query:
+        if not query:
+            return url.rstrip('/')
+
+        for k, v in query.items():
+            print(k, v)
+
+        # Sort all the queries
+        queries = []
+        for q in query.split('&'):
+            if '=' not in q:
+                return url
+
+            key, value = q.split('=')
+            if remove_empty_query and not value:
+                continue
+
+            queries.append((key, value))
+
+        queries.sort(key=lambda x: x[0])
+        query = urlencode(queries)
+
+        return urlunsplit((scheme, netloc, path, query, fragment)).rstrip('/')
+    except:
         return url.rstrip('/')
-
-    # Sort all the queries
-    queries = []
-    for q in query.split('&'):
-        if '=' not in q:
-            return url
-
-        key, value = q.split('=')
-        if remove_empty_query and not value:
-            continue
-
-        queries.append((key, value))
-
-    queries.sort(key=lambda x: x[0])
-    query = urlencode(queries)
-
-    return urlunsplit((scheme, netloc, path, query, fragment)).rstrip('/')
 
 
 def base_url(url):
@@ -50,9 +56,7 @@ def base_url(url):
 
 
 def main():
-    url = (safe_url('http://fanyi.baidu.com/translate?jlfal=测试&aldtype=16047&ell='))
-    print(url)
-    print(safe_url('https://movie.douban.com/subject/2353023'))
+    pass
 
 
 if __name__ == '__main__':

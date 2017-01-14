@@ -21,9 +21,9 @@ __author__ = 'Chris'
 
 class GeneralSpider(BaseSpider):
     name = 'general_spider'
-    start_urls = ['https://www.hao123.com/', 'https://123.sogou.com/',
-                  'http://www.3456.cc/index.html', 'https://hao.360.cn/',
-                  'http://stackoverflow.com']
+    start_urls = ['http://stackoverflow.com',
+                  'https://www.hao123.com/', 'https://123.sogou.com/',
+                  'http://www.3456.cc/index.html', 'https://hao.360.cn/']
 
     default_headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -45,26 +45,28 @@ class GeneralSpider(BaseSpider):
         try:
             html_root = fromstring(response.content, base_url=response.base_url)
 
+            yield {'url': response.url, 'timestamp': str(datetime.datetime.now()),
+                   'status': response.status,
+                   'title': self._extract_title(html_root),
+                   'description': self._extract_description(html_root),
+                   'keywords': self._extract_description(html_root)}
+
             for url in html_root.xpath('//a/@href'):
                 if url.startswith('https://') or url.startswith('http://'):
-                    yield {'url': url, 'timestamp': str(datetime.datetime.now()),
-                           'status': response.status,
-                           'title': self._extract_title(html_root),
-                           'description': self._extract_description(html_root),
-                           'keywords': self._extract_description(html_root)}
-
                     yield Request(url, headers=self.default_headers)
-        except:
-            pass
+        except Exception as err:
+            yield {'url': response.url, 'status': response.status,
+                   'timestamp': str(datetime.datetime.now()),
+                   'error': err}
 
     def _extract_title(self, node):
         return self._xpath_first(node, '//title/text()').strip()
 
     def _extract_keywords(self, node):
-        return self._xpath_first(node, '//head//meta[@name="keywords"]/@content').strip()
+        return self._xpath_first(node, '//meta[@name="keywords"]/@content').strip()
 
     def _extract_description(self, node):
-        return self._xpath_first(node, '//head/meta[@name="description"]/@content').strip()
+        return self._xpath_first(node, '//meta[@name="description"]/@content').strip()
 
     @staticmethod
     def _xpath_first(node, exp, default=''):
@@ -79,11 +81,11 @@ class GeneralSpider(BaseSpider):
 
 def main():
     settings = {
-        'download_delay': 0.25,
+        'download_delay': 1,
         'download_timeout': 32,
         'retry_on_timeout': False,
-        'concurrent_requests': 64,
-        'queue_size': 1024 * 4
+        'concurrent_requests': 512,
+        'queue_size': 4096
     }
 
     crawler = CrawlerProcess(settings, 'DEBUG')
