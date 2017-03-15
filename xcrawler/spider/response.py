@@ -16,7 +16,8 @@ __author__ = 'Chris'
 
 
 class Response(object):
-    def __init__(self, url, status, content, request, cookies=None, headers=None):
+    def __init__(self, url, status, content,
+                 request, cookies=None, headers=None):
         self.request = request
         self.url = url
         self.base_url = base_url(url)
@@ -34,5 +35,5 @@ class Response(object):
         return self.content.decode('utf-8')
 
     def __repr__(self):
-        return '<Response status={} url="{}" content="{}">'.format(self.status, self.url,
-                                                                   self.content[:60])
+        return '<Response status={} url="{}" \
+        content="{}">'.format(self.status, self.url, self.content[:60])

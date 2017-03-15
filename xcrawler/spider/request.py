@@ -13,7 +13,9 @@ __author__ = 'Chris'
 
 
 class Request(object):
-    def __init__(self, url, method='GET', data=None, cookies=None, headers=None, meta=None, proxy=None, callback=None,
+    def __init__(self, url, method='GET', data=None,
+                 cookies=None, headers=None, meta=None,
+                 proxy=None, callback=None,
                  dont_filter=False):
         self.url = safe_url(url)
 
